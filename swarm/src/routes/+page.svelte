@@ -71,7 +71,7 @@
 </script>
 
 <section>
-	<button class="btn btn-topup" on:click={testBee}>Test BeeJS</button>
+	<button class="btn btn-topup" on:click={testBee}>Test collection</button>
 </section>
 
 <style>
