@@ -1,0 +1,10 @@
+GET http://localhost:1633/bzz/4cfd611237b483f00b051288230834dd3176637c2e377d2c7a8ee409b93164b6/swarm.jpeg
+
+###
+GET http://localhost:1633/bzz/a4a41ca8dbf3ffd5ad1673278f477a9b79ba74c0bb709545ef7fe1258244f46f
+
+###
+GET https://api.gateway.ethswarm.org/bzz/dd9040933d2552deab44b458b2afcf3e0fc45fcdcd3d0d154889c68ca78774a2/file0
+
+###
+GET https://api.gateway.ethswarm.org/bzz/dd9040933d2552deab44b458b2afcf3e0fc45fcdcd3d0d154889c68ca78774a2/file1
