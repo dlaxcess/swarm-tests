@@ -3,7 +3,10 @@
 
 	const bee = new Bee('http://localhost:1633');
 
-	const nodeBatchId6h = '6a7213e98c051e95d796fe1fd053321c21fd0a24f1dfa289cedab8fa3c6b1f9c';
+	const nodeBatchId18depth2days =
+		'5516d8dcb2018f749dfd9e1590cf5afc19ac895a2706f3d0530d63d66e08d5ea';
+
+	const nodeBatchId18depth = '7afb4e40e1a1cd073d8a306e1870af2becd8c59fa7bf46a4ae73c803d4632daf';
 	const nodeBatchId2j = 'bcec78baa7ef7f05c967d521c16da8969461fc1fce7a81128e37f763921b5147';
 	const beeReference = 'fd79d5e0ebd8407e422f53ce1d7c4c41ebf403be55143900f8d1490560294780';
 	const fileReference = 'a4a41ca8dbf3ffd5ad1673278f477a9b79ba74c0bb709545ef7fe1258244f46f';
@@ -69,56 +72,138 @@
 		console.log('fetchFiles ~ blobs:', blobs);
 
 		// On convertit les Blob en File (on suppose que chaque URL est le nom du fichier)
-		let files = blobs.map((blob, index) => new File([blob], `file${index}`));
+		let files = blobs.map((blob, index) => new File([blob], `file${index}`, { type: blob.type }));
 
+		console.log('fetchFiles ~ files:', files);
 		return files;
 	};
 
-	let formData = new FormData();
-
 	const prepareFiles = async () => {
+		let formData = new FormData();
+
 		let filesToupload = await fetchFiles(urls);
 		console.log('prepareFiles ~ files:', filesToupload);
 
 		for (let i = 0; i < filesToupload.length; i++) {
 			formData.append(`file${i}`, filesToupload[i]);
 		}
-		// return filesToupload;
+
+		console.log('prepareFiles ~ formData:', formData);
+
+		return formData;
 	};
 
 	const testBee = async () => {
 		// let filesArray = await prepareFiles();
 		// console.log('testBee ~ filesArray:', filesArray);
-		await prepareFiles();
-		console.log('testBee ~ prepareFiles:', formData);
+		// let formData = await prepareFiles();
 
-		console.log('file0', formData.get('file0'));
-		console.log('file1', formData.get('file1'));
+		// console.log('file0', formData.get('file0'));
+		// console.log('file1', formData.get('file1'));
 
-		// const result = await bee.uploadFiles(nodeBatchId2j, filesArray);
-		// console.log('testBee ~ result:', result);
+		// // const result = await bee.uploadFiles(nodeBatchId2j, filesArray);
+		// // console.log('testBee ~ result:', result);
 
-		var headers = new Headers();
-		headers.append('swarm-postage-batch-id', nodeBatchId2j);
-		headers.append('swarm-pin', 'true');
-		headers.append('swarm-collection', 'true');
+		// var headers = new Headers();
+		// headers.append('swarm-postage-batch-id', nodeBatchId18depth2days);
+		// headers.append('swarm-pin', 'true');
+		// headers.append('swarm-collection', 'true');
 
-		fetch('http://localhost:1633/bzz', {
-			method: 'POST',
-			headers: headers,
-			body: formData
-		})
-			.then((response) => {
-				console.log('testBee ~ response:', response);
-				return response.json();
-			})
-			.then((data) => console.log(data))
-			.catch((error) => console.error('Erreur:', error));
+		// fetch('http://localhost:1633/bzz', {
+		// 	method: 'POST',
+		// 	headers: headers,
+		// 	body: formData
+		// })
+		// 	.then((response) => {
+		// 		console.log('testBee ~ response:', response);
+		// 		return response.json();
+		// 	})
+		// 	.then((data) => console.log(data))
+		// 	.catch((error) => console.error('Erreur:', error));
+
+		let filesToupload = await fetchFiles(urls);
+		console.log('testBee ~ filesToupload:', filesToupload);
+
+		let xhr = new XMLHttpRequest();
+		xhr.open('POST', 'http://localhost:1633/bzz', true);
+
+		let boundary = '----WebKitFormBoundary' + Math.random().toString().substr(2);
+		let contentType = 'multipart/form-data; boundary=' + boundary;
+
+		let body = '';
+		filesToupload.forEach((file, index) => {
+			body += '--' + boundary + '\r\n';
+			body +=
+				'Content-Disposition: form-data; name="file' +
+				index +
+				'"; filename="' +
+				file.name +
+				'"\r\n';
+			body += 'Content-Type: ' + file.type + '\r\n';
+			body += 'Content-Length: ' + file.size + '\r\n';
+			body += '\r\n';
+			body += file; // This would need to be the file data
+			body += '\r\n';
+		});
+		body += '--' + boundary + '--';
+
+		xhr.setRequestHeader('Content-Type', contentType);
+		// xhr.setRequestHeader('Content-Length', `${body.length}`);
+		xhr.setRequestHeader('swarm-postage-batch-id', nodeBatchId18depth2days);
+		xhr.setRequestHeader('swarm-pin', 'true');
+		xhr.setRequestHeader('swarm-collection', 'true');
+
+		xhr.send(body);
+
+		// let filesToupload = await fetchFiles(urls);
+		// console.log('testBee ~ filesToupload:', filesToupload);
+
+		// let boundary = '----WebKitFormBoundary' + Math.random().toString().substr(2);
+
+		// let fileReaders = filesToupload.map((file) => {
+		// 	let reader = new FileReader();
+		// 	reader.readAsArrayBuffer(file);
+		// 	return reader;
+		// });
+
+		// Promise.all(
+		// 	fileReaders.map(
+		// 		(reader) =>
+		// 			new Promise((resolve) => {
+		// 				reader.onload = () => resolve(reader.result);
+		// 			})
+		// 	)
+		// )
+		// 	.then((arrayBuffers) => {
+		// 		let body = '';
+		// 		arrayBuffers.forEach((arrayBuffer, index) => {
+		// 			let fileData = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+		// 			body += '--' + boundary + '\r\n';
+		// 			body +=
+		// 				'Content-Disposition: form-data; name="file' +
+		// 				index +
+		// 				'"; filename="file' +
+		// 				index +
+		// 				'"\r\n';
+		// 			body += 'Content-Type: ' + filesToupload[index].type + '\r\n';
+		// 			body += '\r\n';
+		// 			body += fileData;
+		// 			body += '\r\n';
+		// 		});
+		// 		body += '--' + boundary + '--';
+
+		// 		let xhr = new XMLHttpRequest();
+		// 		xhr.open('POST', 'http://localhost:1633/bzz', true);
+		// 		xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+		// 		xhr.setRequestHeader('swarm-postage-batch-id', nodeBatchId18depth2days);
+		// 		xhr.setRequestHeader('swarm-pin', 'true');
+		// 		xhr.setRequestHeader('swarm-collection', 'true');
+		// 		xhr.send(body);
+		// 	})
+		// 	.catch((error) => console.error('Erreur lors de la lecture des fichiers :', error));
 	};
 
 	// "dd9040933d2552deab44b458b2afcf3e0fc45fcdcd3d0d154889c68ca78774a2"
-
-	
 </script>
 
 <section>
