@@ -2,89 +2,57 @@
 	const nodeBatchId18depth2days =
 		'5516d8dcb2018f749dfd9e1590cf5afc19ac895a2706f3d0530d63d66e08d5ea';
 
-	let urls = [
-		'https://ipfs.io/ipfs/bafybeignamxpftgmvoowon6w5cgkrunowaopizekielfjeth5fsmwgrv3i',
-		'https://bafkreidy4ittmzdpprothuzjkrf77ifm5ezmgst6biqbrsfbifwdvbrx6e.ipfs.nftstorage.link'
-	];
-
-	let filesSize = 0;
-
-	const calculateTotalSize = (files: File[]) => {
-		let totalSize = 0;
-		for (let file of files) {
-			totalSize += file.size;
-		}
-		return totalSize;
-	};
-
-	const fetchFiles = async (urls: string[]) => {
-		let fetchPromises = urls.map((url) => {
-			return fetch(url)
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error(`Error getting : ${url}: ${response.statusText}`);
-					}
-					return response.blob();
-				})
-				.catch((error) => console.error('Error while geting an URL:', error));
-		});
-
-		let blobs = await Promise.all(fetchPromises);
-
-		blobs = blobs.filter((blob) => blob !== undefined);
-		console.log('fetchFiles ~ blobs:', blobs);
-
-		let files = blobs.map(
-			(blob, index) => new File([blob as Blob], `file${index}`, { type: (blob as Blob).type })
-		);
-
-		filesSize = calculateTotalSize(files);
-
-		return files;
-	};
-
-	const prepareFiles = async () => {
-		let formData = new FormData();
-
-		let filesToupload = await fetchFiles(urls);
-		console.log('prepareFiles ~ files:', filesToupload);
-
-		for (let i = 0; i < filesToupload.length; i++) {
-			formData.append(`file${i}`, filesToupload[i]);
-		}
-
-		return formData;
-	};
+	const fileHash = 'daa882683c3712146488ebe7282e208720b065257678687434fe37a6ed3ae741';
+	// const fileHash = '15afbaec7eaf77097e4f8ed031b5d1067c6a70dbf7168e1fb80d7745f1738b6c';
 
 	const testBee = async () => {
-		let formData = await prepareFiles();
-		console.log('testBee ~ prepareFiles:', formData);
+		const responseAvailable = await fetch(`http://localhost:1633/stewardship/${fileHash}`, {
+			method: 'GET'
+		});
+		const jsonAvailable = await responseAvailable.json();
+		console.log('testBee ~ responseAvailable:', jsonAvailable);
 
-		console.log('file0', formData.get('file0'));
-		console.log('file1', formData.get('file1'));
+		if (!jsonAvailable.isRetrievable) return;
+
+		////////////////////////////////////////////////////////////////
 
 		var headers = new Headers();
 		headers.append('swarm-postage-batch-id', nodeBatchId18depth2days);
-		headers.append('swarm-pin', 'true');
-		headers.append('swarm-collection', 'true');
-		headers.append('Content-Length', `${filesSize}`);
 
-		fetch('http://localhost:1633/bzz', {
-			method: 'POST',
-			headers: headers,
-			body: formData
-		})
-			.then((response) => {
-				console.log('testBee ~ response:', response);
-				return response.json();
-			})
-			.then((data) => console.log(data))
-			.catch((error) => console.error('Error:', error));
+		const response = await fetch(`http://localhost:1633/stewardship/${fileHash}`, {
+			method: 'PUT',
+			headers: headers
+		});
+
+		console.log('testBee ~ response:', response);
+
+		const data = await response.json();
+		console.log('testBee ~ data:', data);
+
+		////////////////////////////////////////////////////////////////
+
+		const responsePinCheck = await fetch(`http://localhost:1633/pins/${fileHash}`, {
+			method: 'GET'
+		});
+		console.log('testBee ~ responsePinCheck:', responsePinCheck);
+
+		const jsonPinCheck = await responsePinCheck.json();
+		console.log('testBee ~ responsePinCheck:', jsonPinCheck);
+
+		if (!responsePinCheck.ok) {
+			const responsePin = await fetch(`http://localhost:1633/pins/${fileHash}`, {
+				method: 'POST'
+			});
+			console.log('testBee ~ responsePin:', responsePin);
+
+			const jsonPin = await responsePin.json();
+			console.log('testBee ~ jsonPin:', jsonPin);
+		}
 	};
 </script>
 
 <section>
-	<button class="btn btn-topup" on:click={testBee}>Stewardship</button>
+	<button class="btn btn-topup" on:click={testBee}>Test collection</button>
 </section>
 
 <style>
