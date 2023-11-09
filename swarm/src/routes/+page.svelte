@@ -1,131 +1,63 @@
-<script>
-	import { Bee } from '@ethersphere/bee-js';
-
-	const bee = new Bee('http://localhost:1633');
-
+<script lang="ts">
 	const nodeBatchId18depth2days =
 		'5516d8dcb2018f749dfd9e1590cf5afc19ac895a2706f3d0530d63d66e08d5ea';
-
-	const nodeBatchId18depth = '7afb4e40e1a1cd073d8a306e1870af2becd8c59fa7bf46a4ae73c803d4632daf';
-	const nodeBatchId2j = 'bcec78baa7ef7f05c967d521c16da8969461fc1fce7a81128e37f763921b5147';
-	const beeReference = 'fd79d5e0ebd8407e422f53ce1d7c4c41ebf403be55143900f8d1490560294780';
-	const fileReference = 'a4a41ca8dbf3ffd5ad1673278f477a9b79ba74c0bb709545ef7fe1258244f46f';
-	const twoDayFileRef = 'bc6361e872f78e04df49ca3904cac8ece8394b20e6cfaa3712e9161aaf5e2ab9';
-	// ad8a3d076205e768ad7a21ff2de1248f64b684006f7634f51fd0fd00314edead
-	// ad8a3d076205e768ad7a21ff2de1248f64b684006f7634f51fd0fd00314edead
-
-	// const testBee = async () => {
-	// 	const response = await fetch(
-	// 		'https://api.gateway.ethswarm.org/bzz/ac8445cf1fd7999eec135ef087b9cfeebfd2297734eee64092381da1ddc3e2d8'
-	// 	);
-	// 	console.log('testBee ~ response:', response);
-	// 	const contentDisposition = response.headers.get('Content-Disposition');
-	// 	const fileName = contentDisposition.split('filename=')[1];
-	// 	console.log(fileName); // Affiche "myfile.txt"
-
-	// 	const blob = await response.blob();
-	// 	console.log('testBee ~ blob:', blob);
-
-	// 	var headers = new Headers();
-	// 	headers.append('swarm-postage-batch-id', nodeBatchId2j);
-	// 	headers.append('swarm-pin', 'true');
-	// 	// headers.append('Authorization', 'Bearer votre_token');
-
-	// 	fetch('http://localhost:1633/bytes', {
-	// 		method: 'POST',
-	// 		headers: headers,
-	// 		body: blob
-	// 	})
-	// 		.then((response) => {
-	// 			console.log('testBee ~ response:', response);
-	// 			return response.json();
-	// 		})
-	// 		.then((data) => console.log(data))
-	// 		.catch((error) => console.error('Erreur:', error));
-	// };
 
 	let urls = [
 		'https://ipfs.io/ipfs/bafybeignamxpftgmvoowon6w5cgkrunowaopizekielfjeth5fsmwgrv3i',
 		'https://bafkreidy4ittmzdpprothuzjkrf77ifm5ezmgst6biqbrsfbifwdvbrx6e.ipfs.nftstorage.link'
 	];
 
-	const fetchFiles = async (urls) => {
+	const fetchFiles = async (urls: string[]) => {
 		let fetchPromises = urls.map((url) => {
 			return fetch(url)
 				.then((response) => {
 					if (!response.ok) {
 						throw new Error(`Erreur lors de la récupération de ${url}: ${response.statusText}`);
 					}
-					return response.blob(); // on retourne un Blob au lieu de la réponse directement
+					return response.blob();
 				})
 				.catch((error) => console.error("Erreur lors de la récupération d'une URL:", error));
 		});
 
-		// On attend que toutes les requêtes soient terminées
 		let responses = await Promise.all(fetchPromises);
 		console.log('fetchFiles ~ responses:', responses);
 
-		// On récupère les données des réponses sous forme de Blob
 		let blobs = await Promise.all(fetchPromises);
 
 		blobs = blobs.filter((blob) => blob !== undefined);
 		console.log('fetchFiles ~ blobs:', blobs);
 
-		// On convertit les Blob en File (on suppose que chaque URL est le nom du fichier)
-		let files = blobs.map((blob, index) => new File([blob], `file${index}`, { type: blob.type }));
-
+		let files = blobs.map(
+			(blob, index) => new File([blob as Blob], `file${index}`, { type: (blob as Blob).type })
+		);
 		console.log('fetchFiles ~ files:', files);
+
 		return files;
 	};
 
-	const prepareFiles = async () => {
-		let formData = new FormData();
-
-		let filesToupload = await fetchFiles(urls);
-		console.log('prepareFiles ~ files:', filesToupload);
-
-		for (let i = 0; i < filesToupload.length; i++) {
-			formData.append(`file${i}`, filesToupload[i]);
-		}
-
-		console.log('prepareFiles ~ formData:', formData);
-
-		return formData;
+	const filesToBase64 = (files: File[]) => {
+		return Promise.all(
+			files.map((file) => {
+				return new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onloadend = () => resolve(reader.result);
+					reader.onerror = reject;
+					reader.readAsDataURL(file);
+				});
+			})
+		);
 	};
 
 	const testBee = async () => {
-		// let filesArray = await prepareFiles();
-		// console.log('testBee ~ filesArray:', filesArray);
-		// let formData = await prepareFiles();
-
-		// console.log('file0', formData.get('file0'));
-		// console.log('file1', formData.get('file1'));
-
-		// // const result = await bee.uploadFiles(nodeBatchId2j, filesArray);
-		// // console.log('testBee ~ result:', result);
-
-		// var headers = new Headers();
-		// headers.append('swarm-postage-batch-id', nodeBatchId18depth2days);
-		// headers.append('swarm-pin', 'true');
-		// headers.append('swarm-collection', 'true');
-
-		// fetch('http://localhost:1633/bzz', {
-		// 	method: 'POST',
-		// 	headers: headers,
-		// 	body: formData
-		// })
-		// 	.then((response) => {
-		// 		console.log('testBee ~ response:', response);
-		// 		return response.json();
-		// 	})
-		// 	.then((data) => console.log(data))
-		// 	.catch((error) => console.error('Erreur:', error));
-
 		let filesToupload = await fetchFiles(urls);
 		console.log('testBee ~ filesToupload:', filesToupload);
 
+		let files64 = await filesToBase64(filesToupload);
+		console.log('testBee ~ files64:', files64);
+
 		let xhr = new XMLHttpRequest();
 		xhr.open('POST', 'http://localhost:1633/bzz', true);
+		xhr.responseType = 'json';
 
 		let boundary = '----WebKitFormBoundary' + Math.random().toString().substr(2);
 		let contentType = 'multipart/form-data; boundary=' + boundary;
@@ -142,68 +74,31 @@
 			body += 'Content-Type: ' + file.type + '\r\n';
 			body += 'Content-Length: ' + file.size + '\r\n';
 			body += '\r\n';
-			body += file; // This would need to be the file data
+			body += files64[index];
 			body += '\r\n';
 		});
 		body += '--' + boundary + '--';
 
 		xhr.setRequestHeader('Content-Type', contentType);
-		// xhr.setRequestHeader('Content-Length', `${body.length}`);
 		xhr.setRequestHeader('swarm-postage-batch-id', nodeBatchId18depth2days);
 		xhr.setRequestHeader('swarm-pin', 'true');
 		xhr.setRequestHeader('swarm-collection', 'true');
 
+		xhr.onload = function () {
+			if (xhr.status === 201) {
+				console.log(xhr.response);
+			} else {
+				console.error('Erreur lors de la requête : ' + xhr.status);
+			}
+		};
+
+		xhr.onerror = function () {
+			console.error('Une erreur est survenue lors de la requête');
+		};
+
 		xhr.send(body);
-
-		// let filesToupload = await fetchFiles(urls);
-		// console.log('testBee ~ filesToupload:', filesToupload);
-
-		// let boundary = '----WebKitFormBoundary' + Math.random().toString().substr(2);
-
-		// let fileReaders = filesToupload.map((file) => {
-		// 	let reader = new FileReader();
-		// 	reader.readAsArrayBuffer(file);
-		// 	return reader;
-		// });
-
-		// Promise.all(
-		// 	fileReaders.map(
-		// 		(reader) =>
-		// 			new Promise((resolve) => {
-		// 				reader.onload = () => resolve(reader.result);
-		// 			})
-		// 	)
-		// )
-		// 	.then((arrayBuffers) => {
-		// 		let body = '';
-		// 		arrayBuffers.forEach((arrayBuffer, index) => {
-		// 			let fileData = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-		// 			body += '--' + boundary + '\r\n';
-		// 			body +=
-		// 				'Content-Disposition: form-data; name="file' +
-		// 				index +
-		// 				'"; filename="file' +
-		// 				index +
-		// 				'"\r\n';
-		// 			body += 'Content-Type: ' + filesToupload[index].type + '\r\n';
-		// 			body += '\r\n';
-		// 			body += fileData;
-		// 			body += '\r\n';
-		// 		});
-		// 		body += '--' + boundary + '--';
-
-		// 		let xhr = new XMLHttpRequest();
-		// 		xhr.open('POST', 'http://localhost:1633/bzz', true);
-		// 		xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-		// 		xhr.setRequestHeader('swarm-postage-batch-id', nodeBatchId18depth2days);
-		// 		xhr.setRequestHeader('swarm-pin', 'true');
-		// 		xhr.setRequestHeader('swarm-collection', 'true');
-		// 		xhr.send(body);
-		// 	})
-		// 	.catch((error) => console.error('Erreur lors de la lecture des fichiers :', error));
 	};
-
-	// "dd9040933d2552deab44b458b2afcf3e0fc45fcdcd3d0d154889c68ca78774a2"
+	// c2c90a0677f467f5e0011df4095ca757854c2e6de8275564dc41d4d18023a2ff
 </script>
 
 <section>
