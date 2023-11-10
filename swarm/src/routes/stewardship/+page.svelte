@@ -4,31 +4,44 @@
 
 	const fileHashZapaz1 = 'daa882683c3712146488ebe7282e208720b065257678687434fe37a6ed3ae741';
 	const fileHashZapaz2 = '88cff91ddb09e053e4222a3309274fc6129ca2ac6d2f8370cdefa4c7b6c8849a';
-	// const fileHash = '15afbaec7eaf77097e4f8ed031b5d1067c6a70dbf7168e1fb80d7745f1738b6c';
+	// const fileHashPinnedButNotAvailable = '15afbaec7eaf77097e4f8ed031b5d1067c6a70dbf7168e1fb80d7745f1738b6c';
 
-	const testBee = async () => {
-		const responseAvailable = await fetch(`http://localhost:1633/stewardship/${fileHashZapaz2}`, {
+	const hashIsRetrievable = async (hash: string) => {
+		const responseAvailable = await fetch(`http://localhost:1633/stewardship/${hash}`, {
 			method: 'GET'
 		});
 		const jsonAvailable = await responseAvailable.json();
-		console.log('testBee ~ responseAvailable:', jsonAvailable);
+		console.log('hashIsRetrievable ~ jsonAvailable:', jsonAvailable);
 
-		if (!jsonAvailable.isRetrievable) return;
+		return jsonAvailable.isRetrievable;
+	};
+
+	const hashAttachOnBatch = async (hash: string, batchId: string) => {
+		var headers = new Headers();
+		headers.append('swarm-postage-batch-id', batchId);
+
+		const response = await fetch(`http://localhost:1633/stewardship/${hash}`, {
+			method: 'PUT',
+			headers: headers
+		});
+
+		const json = await response.json();
+		console.log('hashAttachOnBatch ~ json:', json);
+
+		return response.ok;
+	};
+
+	const testBee = async () => {
+		if (!(await hashIsRetrievable(fileHashZapaz2))) return;
 
 		////////////////////////////////////////////////////////////////
 
-		// var headers = new Headers();
-		// headers.append('swarm-postage-batch-id', nodeBatchId18depth2days);
+		const hashReattached = hashAttachOnBatch(fileHashZapaz2, nodeBatchId18depth2days);
 
-		// const response = await fetch(`http://localhost:1633/stewardship/${fileHashZapaz2}`, {
-		// 	method: 'PUT',
-		// 	headers: headers
-		// });
-
-		// console.log('testBee ~ response:', response);
-
-		// const data = await response.json();
-		// console.log('testBee ~ data:', data);
+		if (!hashReattached) {
+			console.error("It's been an error reattaching Swarm hash");
+			return;
+		}
 
 		////////////////////////////////////////////////////////////////
 

@@ -66,7 +66,16 @@
 		let decoder = new TextDecoder('utf-8');
 		return decoder.decode(buffer);
 	}
-    
+
+	function arrayBufferToBinaryString(buffer: ArrayBuffer) {
+		let binary = '';
+		let bytes = new Uint8Array(buffer);
+		let len = bytes.byteLength;
+		for (let i = 0; i < len; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return binary;
+	}
 
 	// function calculateBase64Size(base64String: string) {
 	// 	let padding;
@@ -86,7 +95,7 @@
 		let blobsToupload = await fetchFiles(urls);
 
 		let filesToupload = blobsToupload.map(
-			(blob, index) => new File([blob as Blob], `file${index}.jpg`, { type: (blob as Blob).type })
+			(blob, index) => new File([blob as Blob], `file${index}`, { type: (blob as Blob).type })
 		);
 		console.log('fetchFiles ~ files:', filesToupload);
 
@@ -106,9 +115,9 @@
 				file.name +
 				'"\r\n';
 			body += 'Content-Type: ' + file.type + '\r\n';
-			body += 'Content-Length: ' + file.size + '\r\n';
+			body += 'Content-Length: ' + filesBinary[index].byteLength + '\r\n';
 			body += '\r\n';
-			body += arrayBufferToString(filesBinary[index]);
+			body += arrayBufferToBinaryString(filesBinary[index]);
 			body += '\r\n';
 		});
 		body += '--' + boundary + '--';
