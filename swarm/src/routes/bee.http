@@ -8,3 +8,53 @@ GET https://api.gateway.ethswarm.org/bzz/dd9040933d2552deab44b458b2afcf3e0fc45fc
 
 ###
 GET https://api.gateway.ethswarm.org/bzz/dd9040933d2552deab44b458b2afcf3e0fc45fcdcd3d0d154889c68ca78774a2/file1
+
+###
+http://bee.swarm.public.dappnode:1633/bzz/88cff91ddb09e053e4222a3309274fc6129ca2ac6d2f8370cdefa4c7b6c8849a/
+
+###
+http://bee.swarm.public.dappnode:1633/bzz/fca95586c4d8d2c788ec536cab2ecb7ce82f7058b87a140a1f34ee0341ac9408/file1
+
+###
+http://bee.swarm.public.dappnode:1633/bzz/659d9c06dc0ea430a2eeebc995a18002546e66979152fac6005d6a84859d87d3/file0
+
+###
+http://bee.swarm.public.dappnode:1633/bzz/0ae788049f3c112a82fd08109cf78bf5f5d77b079498b0eaa8248b756888f766
+
+
+###
+POST http://bee.swarm.public.dappnode:1633/bzz
+Content-Type: multipart/form-data; boundary=YTJHJHG465HFG
+Swarm-Postage-Batch-Id: 241856bcc2267a69e13de19112aee051191b5afd3b579afcc8923d532994dd17
+Swarm-Collection: true
+Swarm-Pin: true
+
+--YTJHJHG465HFG
+Content-Disposition: form-data; name="noname";
+Content-Type: text/plain
+Content-Length: 3
+
+BZZ
+--YTJHJHG465HFG--
+
+###
+http://bee.swarm.public.dappnode:1633/bzz/93c878f67d90dc9aad83b1d6f65209ab8bb17c3112d2caa26af9db9a9de0f50f/noname
+
+
+
+
+
+@hash = b7a35c77e01c48a680161e68ba45ef3093b83b7efd8f3878ede59a6d03af93d7
+
+### multipart part0 text OK
+http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/part0
+
+### multipart part1 image KO
+http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/part1
+
+
+
+### monopart image OK
+http://bee.swarm.public.dappnode:1633/bzz/af3af561a1f664c861c82743c6fff510c9a7d49cd3a65acb43f56c76481777d3
+
+
