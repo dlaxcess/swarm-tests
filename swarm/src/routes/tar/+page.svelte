@@ -17,8 +17,8 @@
 		const uint8ArrayImage = new Uint8Array(await blobImage.arrayBuffer());
 
 		const collection = [
-			{ data: uint8ArrayText, path: 'metadata' },
-			{ data: uint8ArrayImage, path: 'content' }
+			{ data: uint8ArrayText, path: 'metadata.json' },
+			{ data: uint8ArrayImage, path: 'content.png' }
 		];
 		const body = makeTar(collection);
 
