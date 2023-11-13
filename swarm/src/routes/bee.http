@@ -44,13 +44,13 @@ http://bee.swarm.public.dappnode:1633/bzz/93c878f67d90dc9aad83b1d6f65209ab8bb17c
 
 
 
-@hash = b7a35c77e01c48a680161e68ba45ef3093b83b7efd8f3878ede59a6d03af93d7
+@hash = f3382d738c0140c841d12ee9f548670f8012f79044e8381b349072489febbeed
 
 ### multipart part0 text OK
-http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/part0
+http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/metadata
 
 ### multipart part1 image KO
-http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/part1
+http://bee.swarm.public.dappnode:1633/bzz/{{hash}}/content
 
 
 
